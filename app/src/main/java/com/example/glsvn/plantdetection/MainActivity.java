@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,24 +20,58 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnselect;
+    Button btnselect,btnsave;
     TextView txt;
-    Boolean control = false;
     ImageView imageView;
+
+    private Uri imageUri;
+
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
+    private FirebaseStorage firebaseStorage;
+    private StorageReference mStorageRef;
+    String imagelink;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        txt=findViewById(R.id.txt);
         btnselect=findViewById(R.id.btnselect);
         imageView=findViewById(R.id.imageView);
+        btnsave=findViewById(R.id.btnsave);
+
+        firebaseDatabase=FirebaseDatabase.getInstance();
+        databaseReference=firebaseDatabase.getReference().child("Images");
+        firebaseStorage=FirebaseStorage.getInstance();
+        mStorageRef=firebaseStorage.getReference();
+
+        btnsave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                kaydet();
+            }
+        });
+
         btnselect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                             }
         });
 
-        btnselect.setOnLongClickListener(new View.OnLongClickListener() {
+        imageView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 AlertDialog.Builder mydialog= new AlertDialog.Builder(MainActivity.this);
@@ -111,18 +146,21 @@ public class MainActivity extends AppCompatActivity {
             switch (reqCode) {
                 case 1:
                     try {
-                        final Uri imageUri = data.getData();
+                        imageUri = data.getData();
                         final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                         final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                         imageView.setImageBitmap(selectedImage);
+                        txt.setVisibility(View.GONE);
                     } catch (Exception e) {
                         e.printStackTrace();
-
                     }
                     break;
                 case 2:
                     Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    imageView.setImageBitmap(photo);
+                 //   imageView.setImageBitmap(photo);
+                    saveImage(photo);
+                   // imageUri = data.getData();
+                    txt.setText("Resmi Galeriden seçiniz");
                     break;
             }
         }
@@ -164,6 +202,46 @@ public class MainActivity extends AppCompatActivity {
             Log.w("error", ex.toString());
         }
         return "";
+    }
+
+
+    public void kaydet() {
+
+        if (imageUri != null) {
+
+            final StorageReference imagePath = mStorageRef.child("images/"+(imageUri.getLastPathSegment()));
+
+            imagePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                }
+            });
+            imagePath.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()){
+                        throw task.getException();
+                    }
+                    return imagePath.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isComplete()){
+                        Uri downUri = task.getResult();
+                        imagelink=downUri.toString();
+                        databaseReference.setValue(imagelink);
+                      /*  try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }*/
+                    Toast.makeText(getBaseContext(),"Kaydedildi.",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 
 }

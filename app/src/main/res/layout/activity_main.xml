@@ -30,6 +30,13 @@
         >
     </ImageView>
 
+<Button
+    android:id="@+id/btnsave"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:text="Resmi Gönder"
+    android:textSize="20sp" />
 
 
 </android.widget.LinearLayout>

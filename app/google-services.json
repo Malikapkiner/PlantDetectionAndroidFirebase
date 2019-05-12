@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "23484350177",
+    "firebase_url": "https://plantdetectionandroidfirebase.firebaseio.com",
+    "project_id": "plantdetectionandroidfirebase",
+    "storage_bucket": "plantdetectionandroidfirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23484350177:android:b26c353ec7509c6f",
+        "android_client_info": {
+          "package_name": "com.example.glsvn.plantdetection"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "23484350177-tnd89198hk7kikg7k35dgej4jfmp18qh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.glsvn.plantdetection",
+            "certificate_hash": "77dbd605d5bd691c3e231d2fcf1be5ad4338bf57"
+          }
+        },
+        {
+          "client_id": "23484350177-j7ptvd4u005pnsiv4vl8o797b7549fv5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBko8kCarwYF30NNAM9VNQvuJkgL-70D8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "23484350177-j7ptvd4u005pnsiv4vl8o797b7549fv5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
