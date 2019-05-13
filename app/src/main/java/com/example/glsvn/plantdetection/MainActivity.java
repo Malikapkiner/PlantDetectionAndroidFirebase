@@ -24,8 +24,11 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -40,13 +43,13 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity {
 
     Button btnselect,btnsave;
-    TextView txt;
+    TextView txt,txt2;
     ImageView imageView;
 
     private Uri imageUri;
 
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference;
+    private DatabaseReference databaseReference,databaseReference2;
     private FirebaseStorage firebaseStorage;
     private StorageReference mStorageRef;
     String imagelink;
@@ -56,12 +59,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         txt=findViewById(R.id.txt);
+        txt2=findViewById(R.id.txt2);
         btnselect=findViewById(R.id.btnselect);
         imageView=findViewById(R.id.imageView);
         btnsave=findViewById(R.id.btnsave);
 
         firebaseDatabase=FirebaseDatabase.getInstance();
         databaseReference=firebaseDatabase.getReference().child("Images");
+        databaseReference2=firebaseDatabase.getReference().child("results");
         firebaseStorage=FirebaseStorage.getInstance();
         mStorageRef=firebaseStorage.getReference();
 
@@ -209,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (imageUri != null) {
 
-            final StorageReference imagePath = mStorageRef.child("images/"+(imageUri.getLastPathSegment()));
+            final StorageReference imagePath = mStorageRef.child("images/"+"plantImg");
 
             imagePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -232,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                         Uri downUri = task.getResult();
                         imagelink=downUri.toString();
                         databaseReference.setValue(imagelink);
+                        getTxt();
                       /*  try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -243,5 +249,21 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+    void getTxt()
+    {
+        databaseReference2.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                txt2.setText("Hastalık Durumu:"+dataSnapshot.getValue());
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
 }
